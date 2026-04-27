@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Race Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* ── RESET & VARIABLES ───────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0a0a0c;
+    --surface:   #111116;
+    --card:      #18181f;
+    --border:    #26263a;
+    --accent:    #e8ff00;
+    --accent2:   #ff4d4d;
+    --text:      #f0f0f5;
+    --muted:     #6b6b85;
+    --success:   #2eff9a;
+    --font-head: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius:    10px;
+    --glow:      0 0 24px rgba(232,255,0,0.18);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── SIDEBAR ─────────────────────────────────────────────── */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; height: 100vh;
+    z-index: 100;
+    padding: 28px 0;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo span {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+  .sidebar-logo small {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: -4px;
+  }
+
+  .nav { padding: 20px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+  .nav-section-title {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 12px 6px;
+  }
+
+  .nav-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none; background: none; cursor: pointer;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    transition: all .18s;
+  }
+  .nav-btn:hover { background: var(--card); color: var(--text); }
+  .nav-btn.active { background: rgba(232,255,0,.08); color: var(--accent); }
+  .nav-btn svg { opacity: .7; flex-shrink: 0; }
+  .nav-btn.active svg { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .status-dot {
+    display: inline-block; width: 7px; height: 7px;
+    border-radius: 50%; background: var(--success);
+    margin-right: 6px;
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ── MAIN ────────────────────────────────────────────────── */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOPBAR ──────────────────────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,10,12,.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-title {
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .topbar-actions { display: flex; gap: 10px; }
+
+  /* ── BUTTONS ─────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px;
+    border-radius: var(--radius);
+    border: none; cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 13px; font-weight: 600;
+    transition: all .18s;
+  }
+  .btn-primary { background: var(--accent); color: #0a0a0c; }
+  .btn-primary:hover { filter: brightness(1.1); box-shadow: var(--glow); }
+  .btn-ghost { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--accent2); border: 1px solid var(--accent2); }
+  .btn-danger:hover { background: var(--accent2); color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── CONTENT ─────────────────────────────────────────────── */
+  .content { padding: 32px; flex: 1; }
+
+  .page { display: none; animation: fadeIn .25s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+  /* ── STAT CARDS ──────────────────────────────────────────── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    position: relative; overflow: hidden;
+    transition: border-color .2s;
+  }
+  .stat-card:hover { border-color: var(--accent); }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-label {
+    font-size: 10px; font-family: var(--font-mono);
+    text-transform: uppercase; letter-spacing: 2px; color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--font-head);
+    font-size: 2.4rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* ── TABLE ───────────────────────────────────────────────── */
+  .table-container {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 18px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-title {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    letter-spacing: 1.5px;
+    color: var(--text);
+  }
+  .table-search {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .input-search {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    width: 220px;
+    transition: border-color .15s;
+  }
+  .input-search:focus { border-color: var(--accent); }
+  .input-search::placeholder { color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th {
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  td {
+    padding: 14px 20px;
+    font-size: 13.5px;
+    border-bottom: 1px solid rgba(38,38,58,.5);
+    vertical-align: middle;
+  }
+  tbody tr { transition: background .12s; }
+  tbody tr:hover { background: rgba(232,255,0,.03); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .badge-turma { background: rgba(232,255,0,.1); color: var(--accent); }
+  .badge-equipe { background: rgba(46,255,154,.1); color: var(--success); }
+  .badge-rank { background: rgba(232,255,0,.15); color: var(--accent); min-width: 28px; justify-content: center; }
+  .badge-rank.gold { background: rgba(255,200,0,.2); color: #ffc800; }
+  .badge-rank.silver { background: rgba(180,180,200,.15); color: #b0b0c8; }
+  .badge-rank.bronze { background: rgba(200,120,60,.15); color: #c87c3c; }
+
+  .actions-cell { display: flex; gap: 8px; }
+
+  /* ── MODAL ───────────────────────────────────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: 100%; max-width: 480px;
+    padding: 32px;
+    animation: modalIn .2s ease;
+    position: relative;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:none} }
+
+  .modal-title {
+    font-family: var(--font-head);
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    color: var(--accent);
+  }
+  .modal-close {
+    position: absolute; top: 18px; right: 18px;
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 20px; line-height: 1;
+    transition: color .15s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .form-grid { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 10px; font-family: var(--font-mono);
+    text-transform: uppercase; letter-spacing: 2px; color: var(--muted);
+  }
+  .field input, .field select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .15s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field select { cursor: pointer; }
+  .field select option { background: var(--card); }
+
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+  /* ── TOAST ───────────────────────────────────────────────── */
+  .toast-container {
+    position: fixed; bottom: 28px; right: 28px;
+    display: flex; flex-direction: column; gap: 10px;
+    z-index: 300;
+  }
+  .toast {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--success);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 280px;
+    display: flex; align-items: center; gap: 10px;
+    animation: toastIn .25s ease;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+  .toast.error { border-left-color: var(--accent2); }
+  @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:none} }
+
+  /* ── EMPTY STATE ─────────────────────────────────────────── */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-state svg { opacity: .3; margin-bottom: 16px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── LOADING ─────────────────────────────────────────────── */
+  .loader {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-row td {
+    text-align: center; padding: 40px;
+  }
+
+  /* ── TEMPO FORMAT ────────────────────────────────────────── */
+  .tempo-mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  /* ── RANKING MEDAL ───────────────────────────────────────── */
+  .rank-cell { font-family: var(--font-mono); font-weight: 700; font-size: 14px; }
+
+  /* ── SECTION TITLE ───────────────────────────────────────── */
+  .section-title {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .sidebar { width: 200px; }
+    .main { margin-left: 200px; }
+    .content { padding: 20px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>RACE<br>TRACK</span>
+      <small>dashboard v1.0</small>
+    </div>
+    <nav class="nav">
+      <span class="nav-section-title">Módulos</span>
+      <button class="nav-btn active" onclick="navigate('corredores')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Corredores
+      </button>
+      <button class="nav-btn" onclick="navigate('voltas')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Voltas
+      </button>
+      <button class="nav-btn" onclick="navigate('ranking')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6h13M8 12h9M8 18h5"/><path d="M3 6l1 1-1 1M3 12l1 1-1 1M3 18l1 1-1 1"/></svg>
+        Ranking
+      </button>
+      <button class="nav-btn" onclick="navigate('top5')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+        Top 5 Voltas
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <span class="status-dot"></span> API conectada
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    <header class="topbar">
+      <h1 class="topbar-title" id="page-title">CORREDORES</h1>
+      <div class="topbar-actions" id="topbar-actions">
+        <button class="btn btn-primary" onclick="openModal('create')">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Novo Corredor
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ── PAGE: CORREDORES ──────────────────────────────── -->
+      <section class="page active" id="page-corredores">
+        <div class="stats-grid" id="stats-corredores">
+          <div class="stat-card">
+            <div class="stat-label">Total de Corredores</div>
+            <div class="stat-value" id="stat-total">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Turmas</div>
+            <div class="stat-value" id="stat-turmas">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Equipes</div>
+            <div class="stat-value" id="stat-equipes">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total de Voltas</div>
+            <div class="stat-value" id="stat-voltas">—</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <span class="table-title">LISTA DE CORREDORES</span>
+            <div class="table-search">
+              <input class="input-search" type="text" placeholder="Buscar corredor..." id="search-corredores" oninput="filterTable('tbody-corredores', this.value)" />
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Turma</th>
+                <th>Equipe</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-corredores">
+              <tr class="loading-row"><td colspan="6"><div class="loader"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── PAGE: VOLTAS ──────────────────────────────────── -->
+      <section class="page" id="page-voltas">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Melhor Volta Geral</div>
+            <div class="stat-value" id="stat-melhor-tempo">—</div>
+            <div class="stat-sub" id="stat-melhor-nome">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total de Voltas</div>
+            <div class="stat-value" id="stat-total-voltas2">—</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <span class="table-title">REGISTRAR VOLTA</span>
+          </div>
+          <div style="padding: 28px;">
+            <div class="form-grid">
+              <div class="form-row">
+                <div class="field">
+                  <label>Corredor</label>
+                  <select id="volta-corredor-id">
+                    <option value="">Selecione...</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Tempo (HH:MM:SS)</label>
+                  <input type="text" id="volta-tempo" placeholder="00:01:45" maxlength="8" oninput="maskTempo(this)" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label>Data (opcional)</label>
+                  <input type="datetime-local" id="volta-data" />
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:4px;">
+                <button class="btn btn-primary" onclick="registrarVolta()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                  Registrar Volta
+                </button>
+                <button class="btn btn-ghost" onclick="loadContagem()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                  Atualizar Stats
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:24px;" class="table-container">
+          <div class="table-header">
+            <span class="table-title">CONTAGEM POR CORREDOR</span>
+            <div class="table-search">
+              <input class="input-search" type="text" placeholder="Buscar..." id="search-contagem" oninput="filterTable('tbody-contagem', this.value)" />
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Corredor</th>
+                <th>Turma</th>
+                <th>Equipe</th>
+                <th>Total Voltas</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-contagem">
+              <tr class="loading-row"><td colspan="4"><div class="loader"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── PAGE: RANKING ─────────────────────────────────── -->
+      <section class="page" id="page-ranking">
+        <div class="table-container">
+          <div class="table-header">
+            <span class="table-title">RANKING GERAL — MELHOR VOLTA</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadRanking()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+              Atualizar
+            </button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Pos.</th>
+                <th>Nome</th>
+                <th>Turma</th>
+                <th>Equipe</th>
+                <th>Melhor Volta</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-ranking">
+              <tr class="loading-row"><td colspan="6"><div class="loader"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── PAGE: TOP 5 ───────────────────────────────────── -->
+      <section class="page" id="page-top5">
+        <div class="table-container">
+          <div class="table-header">
+            <span class="table-title">TOP 5 MELHORES VOLTAS</span>
+            <button class="btn btn-ghost btn-sm" onclick="loadTop5()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+              Atualizar
+            </button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Pos.</th>
+                <th>Nome</th>
+                <th>Turma</th>
+                <th>Equipe</th>
+                <th>Tempo</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-top5">
+              <tr class="loading-row"><td colspan="6"><div class="loader"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ── MODAL CORREDOR ──────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 class="modal-title" id="modal-title">NOVO CORREDOR</h2>
+    <div class="form-grid">
+      <input type="hidden" id="edit-id" />
+      <div class="form-row">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" id="field-nome" placeholder="João Silva" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="field-email" placeholder="joao@email.com" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="field-senha" placeholder="••••••" />
+        </div>
+        <div class="field">
+          <label>Turma</label>
+          <input type="text" id="field-turma" placeholder="3A" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Equipe</label>
+        <input type="text" id="field-equipe" placeholder="Time Alpha" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="modal-submit-btn" onclick="submitCorredor()">Salvar Corredor</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ─────────────────────────────────────── -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║  CONFIGURAÇÃO — ajuste a BASE_URL para seu servidor     ║
+// ╚══════════════════════════════════════════════════════════╝
+const BASE_URL = 'http://localhost:3000'; // ← altere aqui
+const API = {
+  corredores: `${BASE_URL}/corredores`,
+  voltas:     `${BASE_URL}/voltas`,
+};
+
+// ── ESTADO ──────────────────────────────────────────────────
+let corredoresCache = [];
+
+// ── UTILITÁRIOS ──────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type === 'error' ? 'error' : ''}`;
+  t.innerHTML = `
+    <svg width="16" height="16" fill="none" stroke="${type === 'error' ? '#ff4d4d' : '#2eff9a'}" stroke-width="2.5" viewBox="0 0 24 24">
+      ${type === 'error'
+        ? '<path d="M18 6L6 18M6 6l12 12"/>'
+        : '<path d="M20 6L9 17l-5-5"/>'}
+    </svg>
+    ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 350); }, 3500);
+}
+
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.erro || `HTTP ${res.status}`);
+  return data;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function rankBadge(r) {
+  if (r === 1) return 'gold';
+  if (r === 2) return 'silver';
+  if (r === 3) return 'bronze';
+  return '';
+}
+
+function filterTable(tbodyId, query) {
+  const tbody = document.getElementById(tbodyId);
+  const rows = tbody.querySelectorAll('tr[data-row]');
+  const q = query.toLowerCase().trim();
+  rows.forEach(r => {
+    r.style.display = q === '' || r.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function maskTempo(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length > 2) v = v.slice(0,2) + ':' + v.slice(2);
+  if (v.length > 5) v = v.slice(0,5) + ':' + v.slice(5);
+  input.value = v.slice(0, 8);
+}
+
+function setLoadingRow(tbodyId, colspan) {
+  document.getElementById(tbodyId).innerHTML =
+    `<tr class="loading-row"><td colspan="${colspan}"><div class="loader"></div></td></tr>`;
+}
+
+function setEmptyRow(tbodyId, colspan, msg = 'Nenhum dado encontrado.') {
+  document.getElementById(tbodyId).innerHTML =
+    `<tr><td colspan="${colspan}"><div class="empty-state"><p>${msg}</p></div></td></tr>`;
+}
+
+// ── NAVEGAÇÃO ────────────────────────────────────────────────
+const pages = {
+  corredores: { title: 'CORREDORES', load: loadCorredores },
+  voltas:     { title: 'VOLTAS',     load: loadVoltas },
+  ranking:    { title: 'RANKING',    load: loadRanking },
+  top5:       { title: 'TOP 5',      load: loadTop5 },
+};
+
+function navigate(key) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`page-${key}`).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    if (b.getAttribute('onclick').includes(`'${key}'`)) b.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = pages[key].title;
+
+  // Atualiza topbar actions
+  const actions = document.getElementById('topbar-actions');
+  if (key === 'corredores') {
+    actions.innerHTML = `
+      <button class="btn btn-primary" onclick="openModal('create')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Novo Corredor
+      </button>`;
+  } else {
+    actions.innerHTML = '';
+  }
+
+  pages[key].load();
+}
+
+// ── CORREDORES ───────────────────────────────────────────────
+async function loadCorredores() {
+  setLoadingRow('tbody-corredores', 6);
+  try {
+    const data = await apiFetch(API.corredores);
+    corredoresCache = data;
+    renderCorredores(data);
+    updateStats(data);
+    await loadContagemGeral();
+    populateCorredorSelect(data);
+  } catch (e) {
+    setEmptyRow('tbody-corredores', 6, `Erro: ${e.message}`);
+    toast(e.message, 'error');
+  }
+}
+
+function renderCorredores(list) {
+  const tbody = document.getElementById('tbody-corredores');
+  if (!list.length) { setEmptyRow('tbody-corredores', 6); return; }
+  tbody.innerHTML = list.map((c, i) => `
+    <tr data-row="1">
+      <td style="color:var(--muted);font-family:var(--font-mono);font-size:12px">${String(i+1).padStart(2,'0')}</td>
+      <td><strong>${c.nome}</strong></td>
+      <td style="color:var(--muted)">${c.email}</td>
+      <td><span class="badge badge-turma">${c.turma}</span></td>
+      <td><span class="badge badge-equipe">${c.equipe}</span></td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('edit', ${JSON.stringify(c).replace(/"/g,'&quot;')})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarCorredor(${c.id},'${c.nome}')">Excluir</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function updateStats(data) {
+  document.getElementById('stat-total').textContent = data.length;
+  document.getElementById('stat-turmas').textContent = new Set(data.map(c => c.turma)).size;
+  document.getElementById('stat-equipes').textContent = new Set(data.map(c => c.equipe)).size;
+}
+
+async function loadContagemGeral() {
+  try {
+    const d = await apiFetch(`${API.voltas}/contagem`);
+    document.getElementById('stat-voltas').textContent = d.total_voltas ?? '—';
+  } catch { /* silencioso */ }
+}
+
+// ── MODAL ────────────────────────────────────────────────────
+function openModal(mode, corredor = null) {
+  document.getElementById('modal-overlay').classList.add('open');
+  const title = document.getElementById('modal-title');
+  const btn = document.getElementById('modal-submit-btn');
+
+  if (mode === 'create') {
+    title.textContent = 'NOVO CORREDOR';
+    btn.textContent = 'Criar Corredor';
+    document.getElementById('edit-id').value = '';
+    ['nome','email','senha','turma','equipe'].forEach(f => document.getElementById(`field-${f}`).value = '');
+  } else {
+    title.textContent = 'EDITAR CORREDOR';
+    btn.textContent = 'Salvar Alterações';
+    document.getElementById('edit-id').value = corredor.id;
+    document.getElementById('field-nome').value = corredor.nome;
+    document.getElementById('field-email').value = corredor.email;
+    document.getElementById('field-senha').value = '';
+    document.getElementById('field-turma').value = corredor.turma;
+    document.getElementById('field-equipe').value = corredor.equipe;
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+async function submitCorredor() {
+  const id = document.getElementById('edit-id').value;
+  const body = {
+    nome:   document.getElementById('field-nome').value.trim(),
+    email:  document.getElementById('field-email').value.trim(),
+    senha:  document.getElementById('field-senha').value,
+    turma:  document.getElementById('field-turma').value.trim(),
+    equipe: document.getElementById('field-equipe').value.trim(),
+  };
+
+  if (!body.nome || !body.email || !body.turma || !body.equipe) {
+    toast('Preencha todos os campos obrigatórios.', 'error'); return;
+  }
+  if (!id && !body.senha) { toast('Senha é obrigatória para novo corredor.', 'error'); return; }
+
+  const btn = document.getElementById('modal-submit-btn');
+  btn.disabled = true;
+
+  try {
+    if (id) {
+      await apiFetch(`${API.corredores}/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+      toast('Corredor atualizado com sucesso!');
+    } else {
+      await apiFetch(API.corredores, { method: 'POST', body: JSON.stringify(body) });
+      toast('Corredor criado com sucesso!');
+    }
+    closeModal();
+    loadCorredores();
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deletarCorredor(id, nome) {
+  if (!confirm(`Excluir o corredor "${nome}"? Esta ação não pode ser desfeita.`)) return;
+  try {
+    await apiFetch(`${API.corredores}/${id}`, { method: 'DELETE' });
+    toast(`Corredor "${nome}" excluído.`);
+    loadCorredores();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ── VOLTAS ───────────────────────────────────────────────────
+function populateCorredorSelect(corredores) {
+  const sel = document.getElementById('volta-corredor-id');
+  sel.innerHTML = '<option value="">Selecione o corredor...</option>';
+  corredores.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.nome} — ${c.turma} | ${c.equipe}`;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadVoltas() {
+  // Carrega corredores se ainda não carregados
+  if (!corredoresCache.length) {
+    try {
+      const data = await apiFetch(API.corredores);
+      corredoresCache = data;
+      populateCorredorSelect(data);
+    } catch (e) { toast(e.message, 'error'); }
+  } else {
+    populateCorredorSelect(corredoresCache);
+  }
+  await Promise.all([loadMelhorVolta(), loadContagemPorCorredores()]);
+}
+
+async function loadMelhorVolta() {
+  try {
+    const d = await apiFetch(`${API.voltas}/melhor-volta`);
+    document.getElementById('stat-melhor-tempo').textContent = d.melhor_volta || '—';
+    document.getElementById('stat-melhor-nome').textContent = d.corredor?.nome || '—';
+  } catch {
+    document.getElementById('stat-melhor-tempo').textContent = '—';
+    document.getElementById('stat-melhor-nome').textContent = 'Sem registros';
+  }
+  try {
+    const d = await apiFetch(`${API.voltas}/contagem`);
+    document.getElementById('stat-total-voltas2').textContent = d.total_voltas ?? '—';
+  } catch { /* silencioso */ }
+}
+
+async function loadContagemPorCorredores() {
+  setLoadingRow('tbody-contagem', 4);
+  if (!corredoresCache.length) { setEmptyRow('tbody-contagem', 4); return; }
+
+  try {
+    const results = await Promise.allSettled(
+      corredoresCache.map(c => apiFetch(`${API.voltas}/contagem/${c.id}`))
+    );
+
+    const rows = results
+      .filter(r => r.status === 'fulfilled')
+      .map(r => r.value);
+
+    if (!rows.length) { setEmptyRow('tbody-contagem', 4); return; }
+
+    document.getElementById('tbody-contagem').innerHTML = rows.map(r => `
+      <tr data-row="1">
+        <td><strong>${r.nome}</strong></td>
+        <td><span class="badge badge-turma">${r.turma}</span></td>
+        <td><span class="badge badge-equipe">${r.equipe}</span></td>
+        <td style="font-family:var(--font-mono);font-size:14px;color:var(--accent)">${r.total_voltas}</td>
+      </tr>`).join('');
+  } catch (e) {
+    setEmptyRow('tbody-contagem', 4, `Erro: ${e.message}`);
+  }
+}
+
+async function registrarVolta() {
+  const corredores_id = document.getElementById('volta-corredor-id').value;
+  const tempo = document.getElementById('volta-tempo').value.trim();
+  const dataRaw = document.getElementById('volta-data').value;
+
+  if (!corredores_id) { toast('Selecione um corredor.', 'error'); return; }
+  if (!tempo || !/^\d{2}:\d{2}:\d{2}$/.test(tempo)) { toast('Tempo inválido. Use HH:MM:SS.', 'error'); return; }
+
+  const body = { corredores_id: Number(corredores_id), tempo };
+  if (dataRaw) body.data = new Date(dataRaw).toISOString();
+
+  try {
+    await apiFetch(`${API.voltas}/`, { method: 'POST', body: JSON.stringify(body) });
+    toast('Volta registrada com sucesso!');
+    document.getElementById('volta-tempo').value = '';
+    document.getElementById('volta-data').value = '';
+    await Promise.all([loadMelhorVolta(), loadContagemPorCorredores()]);
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ── RANKING ──────────────────────────────────────────────────
+async function loadRanking() {
+  setLoadingRow('tbody-ranking', 6);
+  try {
+    const d = await apiFetch(`${API.voltas}/ranking`);
+    const lista = d.ranking || [];
+    if (!lista.length) { setEmptyRow('tbody-ranking', 6, 'Nenhuma volta registrada.'); return; }
+    document.getElementById('tbody-ranking').innerHTML = lista.map(r => `
+      <tr data-row="1">
+        <td class="rank-cell"><span class="badge badge-rank ${rankBadge(r.rank)}">${r.rank}</span></td>
+        <td><strong>${r.nome}</strong></td>
+        <td><span class="badge badge-turma">${r.turma}</span></td>
+        <td><span class="badge badge-equipe">${r.equipe}</span></td>
+        <td><span class="tempo-mono">${r.melhor_volta}</span></td>
+        <td style="color:var(--muted);font-size:12px">${formatDate(r.data_volta)}</td>
+      </tr>`).join('');
+  } catch (e) {
+    setEmptyRow('tbody-ranking', 6, `Erro: ${e.message}`);
+    toast(e.message, 'error');
+  }
+}
+
+// ── TOP 5 ─────────────────────────────────────────────────────
+async function loadTop5() {
+  setLoadingRow('tbody-top5', 6);
+  try {
+    const d = await apiFetch(`${API.voltas}/top5-voltas`);
+    const lista = d.ranking || [];
+    if (!lista.length) { setEmptyRow('tbody-top5', 6, 'Nenhuma volta registrada.'); return; }
+    document.getElementById('tbody-top5').innerHTML = lista.map(r => `
+      <tr data-row="1">
+        <td class="rank-cell"><span class="badge badge-rank ${rankBadge(r.rank)}">${r.rank}</span></td>
+        <td><strong>${r.nome}</strong></td>
+        <td><span class="badge badge-turma">${r.turma}</span></td>
+        <td><span class="badge badge-equipe">${r.equipe}</span></td>
+        <td><span class="tempo-mono">${r.tempo}</span></td>
+        <td style="color:var(--muted);font-size:12px">${formatDate(r.data)}</td>
+      </tr>`).join('');
+  } catch (e) {
+    setEmptyRow('tbody-top5', 6, `Erro: ${e.message}`);
+    toast(e.message, 'error');
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+loadCorredores();
+</script>
+</body>
+</html>
