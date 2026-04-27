@@ -448,10 +448,7 @@
     <header class="topbar">
       <h1 class="topbar-title" id="page-title">CORREDORES</h1>
       <div class="topbar-actions" id="topbar-actions">
-        <button class="btn btn-primary" onclick="openModal('create')">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          Novo Corredor
-        </button>
+        <button class="btn btn-ghost" onclick="logout()">Sair</button>
       </div>
     </header>
 
@@ -690,6 +687,12 @@ const API = {
   voltas:     `${BASE_URL}/voltas`,
 };
 
+// Redireciona de volta para tela de login se não houver token
+if (!sessionStorage.getItem('jwt_token')) {
+  // mantém caminho relativo igual ao arquivo fornecido
+  window.location.href = 'cadastro_login.html';
+}
+
 // ── ESTADO ──────────────────────────────────────────────────
 let corredoresCache = [];
 
@@ -710,10 +713,24 @@ function toast(msg, type = 'success') {
 }
 
 async function apiFetch(url, options = {}) {
+  const token = sessionStorage.getItem('jwt_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   });
+
+  // Trata token inválido/expirado de forma centralizada
+  if (res.status === 401) {
+    sessionStorage.removeItem('jwt_token');
+    sessionStorage.removeItem('user');
+    // envia query para a tela de login pra exibir mensagem
+    window.location.href = 'cadastro_login.html?session=expired';
+    throw new Error('Sessão expirada. Redirecionando para login.');
+  }
+
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || data.erro || `HTTP ${res.status}`);
   return data;
@@ -835,6 +852,15 @@ async function loadContagemGeral() {
     const d = await apiFetch(`${API.voltas}/contagem`);
     document.getElementById('stat-voltas').textContent = d.total_voltas ?? '—';
   } catch { /* silencioso */ }
+}
+
+// ── AUTH ──────────────────────────────────────────────────────
+function logout() {
+  sessionStorage.removeItem('jwt_token');
+  sessionStorage.removeItem('user');
+  // opcional: limpa histórico de navegação da sessão
+  try { history.replaceState(null, '', 'cadastro_login.html'); } catch(e) {}
+  window.location.href = 'cadastro_login.html';
 }
 
 // ── MODAL ────────────────────────────────────────────────────

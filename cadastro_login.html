@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Race Track — Acesso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+/* ── RESET & VARS ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #08080a;
+  --surface:   #0f0f14;
+  --card:      #16161e;
+  --border:    #23233a;
+  --accent:    #e8ff00;
+  --accent2:   #ff4433;
+  --text:      #eeeef5;
+  --muted:     #5a5a75;
+  --success:   #2eff9a;
+  --font-head: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+/* ── BACKGROUND GRID ──────────────────────────────────────── */
+.bg-layer {
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(232,255,0,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,255,0,.028) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.bg-glow {
+  position: fixed; z-index: 0;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  filter: blur(140px);
+  pointer-events: none;
+}
+.bg-glow-1 {
+  background: rgba(232,255,0,.07);
+  top: -200px; right: -150px;
+  animation: driftA 12s ease-in-out infinite alternate;
+}
+.bg-glow-2 {
+  background: rgba(255,68,51,.05);
+  bottom: -200px; left: -150px;
+  animation: driftB 15s ease-in-out infinite alternate;
+}
+@keyframes driftA { from{transform:translate(0,0)} to{transform:translate(-60px,40px)} }
+@keyframes driftB { from{transform:translate(0,0)} to{transform:translate(40px,-50px)} }
+
+/* ── LAYOUT ───────────────────────────────────────────────── */
+.page-wrap {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100vh;
+}
+
+/* ── LEFT PANEL ───────────────────────────────────────────── */
+.panel-left {
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 48px 56px;
+  border-right: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+
+.brand {
+  display: flex; flex-direction: column;
+}
+.brand-name {
+  font-family: var(--font-head);
+  font-size: 3.4rem;
+  letter-spacing: 4px;
+  color: var(--accent);
+  line-height: 0.95;
+  animation: fadeUp .6s ease both;
+}
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 6px;
+  animation: fadeUp .6s .1s ease both;
+}
+
+/* Decorative track lines */
+.track-deco {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 300px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.track-deco svg { width: 100%; height: 100%; }
+
+.left-content {
+  animation: fadeUp .7s .2s ease both;
+}
+.left-headline {
+  font-family: var(--font-head);
+  font-size: 4.2rem;
+  line-height: 0.92;
+  letter-spacing: 2px;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.left-headline em {
+  font-style: normal;
+  color: var(--accent);
+  -webkit-text-stroke: 0px;
+}
+.left-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 340px;
+}
+
+.stats-row {
+  display: flex; gap: 28px;
+  margin-top: 36px;
+  animation: fadeUp .7s .35s ease both;
+}
+.stat-mini { display: flex; flex-direction: column; gap: 3px; }
+.stat-mini-value {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-mini-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+}
+
+.left-footer {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  animation: fadeUp .7s .45s ease both;
+}
+.status-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; background: var(--success);
+  margin-right: 6px;
+  box-shadow: 0 0 8px var(--success);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* ── RIGHT PANEL (FORM) ───────────────────────────────────── */
+.panel-right {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 48px;
+}
+
+.auth-box {
+  width: 100%; max-width: 420px;
+  animation: fadeUp .5s .15s ease both;
+}
+
+/* TABS */
+.tabs {
+  display: flex; gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 32px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none; border-radius: 7px;
+  font-family: var(--font-head);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all .2s;
+  background: transparent;
+  color: var(--muted);
+}
+.tab-btn.active {
+  background: var(--accent);
+  color: #08080a;
+  box-shadow: 0 0 20px rgba(232,255,0,.2);
+}
+
+/* FORMS */
+.form-panel { display: none; }
+.form-panel.active {
+  display: flex; flex-direction: column; gap: 18px;
+  animation: fadeUp .25s ease;
+}
+
+.form-title {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  letter-spacing: 2.5px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.form-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: -14px;
+  margin-bottom: 4px;
+}
+
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field label {
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+}
+.input-wrap { position: relative; }
+.input-wrap svg {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+  transition: color .15s;
+}
+.field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 12px 14px 12px 42px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232,255,0,.08);
+}
+.field input:focus + svg,
+.input-wrap:focus-within svg { color: var(--accent); }
+/* icon before input, fix z-order */
+.field input ~ svg { z-index: 1; }
+.field input:focus ~ svg { color: var(--accent); }
+
+/* reorder: icon inside wrap before input */
+.input-wrap { display: grid; }
+.input-wrap svg { grid-area: 1/1; z-index: 1; pointer-events: none; }
+.input-wrap input { grid-area: 1/1; }
+/* simpler approach: absolute positioning already done above */
+
+.eye-btn {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; padding: 4px;
+  display: flex; align-items: center;
+  transition: color .15s;
+}
+.eye-btn:hover { color: var(--text); }
+
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #08080a;
+  border: none; border-radius: 9px;
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  letter-spacing: 2.5px;
+  cursor: pointer;
+  transition: filter .15s, box-shadow .15s, transform .1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 4px;
+}
+.btn-submit:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 30px rgba(232,255,0,.25);
+  transform: translateY(-1px);
+}
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* divider */
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--muted); font-size: 11px; font-family: var(--font-mono);
+  letter-spacing: 2px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* error / success banners */
+.banner {
+  padding: 12px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid;
+  animation: fadeUp .2s ease;
+}
+.banner.show { display: flex; }
+.banner.error  { background: rgba(255,68,51,.08); border-color: rgba(255,68,51,.3); color: #ff7060; }
+.banner.success { background: rgba(46,255,154,.08); border-color: rgba(46,255,154,.3); color: var(--success); }
+
+/* loader */
+.loader {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(8,8,10,.3);
+  border-top-color: #08080a;
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* token display */
+.token-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 14px;
+  display: none;
+}
+.token-box.show { display: block; }
+.token-label {
+  font-size: 9px; font-family: var(--font-mono);
+  text-transform: uppercase; letter-spacing: 2px; color: var(--muted);
+  margin-bottom: 8px;
+}
+.token-value {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--accent);
+  word-break: break-all;
+  line-height: 1.6;
+}
+.token-meta { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.token-meta strong { color: var(--text); }
+
+.copy-btn {
+  margin-top: 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 14px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* redirect link */
+.redirect-link {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: -6px;
+}
+.redirect-link a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.redirect-link a:hover { text-decoration: underline; }
+
+/* ── ANIMATIONS ───────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .page-wrap { grid-template-columns: 1fr; }
+  .panel-left { display: none; }
+  .panel-right { padding: 32px 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<div class="page-wrap">
+
+  <!-- ── LEFT PANEL ────────────────────────────────────────── -->
+  <div class="panel-left">
+    <div class="brand">
+      <span class="brand-name">RACE<br>TRACK</span>
+      <span class="brand-sub">sistema de corridas</span>
+    </div>
+
+    <div class="left-content">
+      <h2 class="left-headline">
+        GERENCIE<br>CADA <em>VOLTA</em><br>COM PRECISÃO
+      </h2>
+      <p class="left-desc">
+        Plataforma completa para registro de corredores, controle de voltas e ranking em tempo real.
+      </p>
+      <div class="stats-row">
+        <div class="stat-mini">
+          <span class="stat-mini-value">∞</span>
+          <span class="stat-mini-label">Corredores</span>
+        </div>
+        <div class="stat-mini">
+          <span class="stat-mini-value">8H</span>
+          <span class="stat-mini-label">Sessão JWT</span>
+        </div>
+        <div class="stat-mini">
+          <span class="stat-mini-value">REST</span>
+          <span class="stat-mini-label">API</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- decorative SVG track lines -->
+    <div class="track-deco">
+      <svg viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <path d="M-20 280 Q100 200 200 220 T500 160" stroke="rgba(232,255,0,0.08)" stroke-width="1.5" fill="none"/>
+        <path d="M-20 260 Q120 180 220 200 T500 140" stroke="rgba(232,255,0,0.05)" stroke-width="1" fill="none"/>
+        <path d="M-20 300 Q80 220 180 240 T500 180" stroke="rgba(232,255,0,0.04)" stroke-width="1" fill="none"/>
+        <circle cx="200" cy="220" r="3" fill="rgba(232,255,0,0.3)"/>
+        <circle cx="350" cy="185" r="2" fill="rgba(232,255,0,0.2)"/>
+      </svg>
+    </div>
+
+    <div class="left-footer">
+      <span class="status-dot"></span> API operacional &nbsp;·&nbsp; v1.0
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ────────────────────────────────────────── -->
+  <div class="panel-right">
+    <div class="auth-box">
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">LOGIN</button>
+        <button class="tab-btn" id="tab-register" onclick="switchTab('register')">CADASTRO</button>
+      </div>
+
+      <!-- ── FORM: LOGIN ───────────────────────────────────── -->
+      <div class="form-panel active" id="form-login">
+        <h2 class="form-title">ENTRAR</h2>
+        <p class="form-subtitle">Acesse sua conta para continuar</p>
+
+        <div class="banner" id="login-banner">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
+          <span id="login-banner-msg"></span>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <div class="input-wrap">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);z-index:1">
+              <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
+            </svg>
+            <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email" onkeydown="handleEnter(event,'login')" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Senha</label>
+          <div class="input-wrap" style="position:relative">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);z-index:1">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password" onkeydown="handleEnter(event,'login')" />
+            <button class="eye-btn" type="button" onclick="toggleSenha('login-senha', this)" tabindex="-1">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="btn-login" onclick="doLogin()">
+          ENTRAR
+        </button>
+
+        <!-- Token exibido após login bem-sucedido -->
+        <div class="token-box" id="token-box">
+          <div class="token-label">JWT Token</div>
+          <div class="token-value" id="token-value"></div>
+          <div class="token-meta" id="token-meta"></div>
+          <button class="copy-btn" onclick="copyToken()">Copiar token</button>
+        </div>
+
+        <p class="redirect-link">
+          Não tem conta? <a onclick="switchTab('register')">Cadastre-se</a>
+        </p>
+      </div>
+
+      <!-- ── FORM: CADASTRO ─────────────────────────────────── -->
+      <div class="form-panel" id="form-register">
+        <h2 class="form-title">CADASTRO</h2>
+        <p class="form-subtitle">Crie sua conta gratuitamente</p>
+
+        <div class="banner" id="register-banner">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
+          <span id="register-banner-msg"></span>
+        </div>
+
+        <div class="field">
+          <label>Nome completo</label>
+          <div class="input-wrap" style="position:relative">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);z-index:1">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+            <input type="text" id="reg-nome" placeholder="João Silva" autocomplete="name" onkeydown="handleEnter(event,'register')" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <div class="input-wrap" style="position:relative">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);z-index:1">
+              <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/>
+            </svg>
+            <input type="email" id="reg-email" placeholder="seu@email.com" autocomplete="email" onkeydown="handleEnter(event,'register')" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Senha</label>
+          <div class="input-wrap" style="position:relative">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);z-index:1">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input type="password" id="reg-senha" placeholder="mínimo 6 caracteres" autocomplete="new-password" oninput="checkSenhaStrength(this.value)" onkeydown="handleEnter(event,'register')" />
+            <button class="eye-btn" type="button" onclick="toggleSenha('reg-senha', this)" tabindex="-1">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <!-- password strength -->
+          <div id="strength-bar-wrap" style="display:none;flex-direction:column;gap:5px;margin-top:2px">
+            <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden">
+              <div id="strength-bar" style="height:100%;width:0%;border-radius:2px;transition:width .3s,background .3s"></div>
+            </div>
+            <span id="strength-label" style="font-size:10px;font-family:var(--font-mono);color:var(--muted)"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Confirmar senha</label>
+          <div class="input-wrap" style="position:relative">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);z-index:1">
+              <path d="M9 12l2 2 4-4"/><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input type="password" id="reg-confirm" placeholder="repita a senha" autocomplete="new-password" onkeydown="handleEnter(event,'register')" />
+          </div>
+        </div>
+
+        <button class="btn-submit" id="btn-register" onclick="doRegister()">
+          CRIAR CONTA
+        </button>
+
+        <p class="redirect-link">
+          Já tem conta? <a onclick="switchTab('login')">Faça login</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║  CONFIGURAÇÃO — ajuste para seu servidor                ║
+// ╚══════════════════════════════════════════════════════════╝
+const BASE_URL  = 'http://localhost:3000';
+const API_USERS = `${BASE_URL}/users`;
+
+// Habilita redirecionamento para dashboard após login/registro
+window._redirectOnLogin = 'dashboard.html';
+
+// ── UTILS ─────────────────────────────────────────────────────
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.erro || `HTTP ${res.status}`);
+  return data;
+}
+
+function showBanner(id, msg, type = 'error') {
+  const el = document.getElementById(id);
+  const msgEl = document.getElementById(`${id}-msg`);
+  el.className = `banner show ${type}`;
+  msgEl.textContent = msg;
+  // ícone
+  const svg = el.querySelector('svg');
+  if (type === 'success') {
+    svg.innerHTML = '<path d="M20 6L9 17l-5-5"/>';
+  } else {
+    svg.innerHTML = '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>';
+  }
+}
+
+function hideBanner(id) {
+  document.getElementById(id).className = 'banner';
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  if (loading) {
+    btn.innerHTML = '<div class="loader"></div> AGUARDE...';
+  } else {
+    btn.innerHTML = btnId === 'btn-login' ? 'ENTRAR' : 'CRIAR CONTA';
+  }
+}
+
+function handleEnter(e, form) {
+  if (e.key === 'Enter') {
+    form === 'login' ? doLogin() : doRegister();
+  }
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById(`form-${tab}`).classList.add('active');
+  hideBanner('login-banner');
+  hideBanner('register-banner');
+  document.getElementById('token-box').classList.remove('show');
+}
+
+// ── SENHA VISIBILITY ──────────────────────────────────────────
+function toggleSenha(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  btn.innerHTML = isPass
+    ? `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+         <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+         <path d="m1 1 22 22"/>
+       </svg>`
+    : `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+         <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+       </svg>`;
+}
+
+// ── SENHA STRENGTH ────────────────────────────────────────────
+function checkSenhaStrength(val) {
+  const wrap = document.getElementById('strength-bar-wrap');
+  const bar  = document.getElementById('strength-bar');
+  const lbl  = document.getElementById('strength-label');
+
+  if (!val) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'flex';
+
+  let score = 0;
+  if (val.length >= 6)  score++;
+  if (val.length >= 10) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/\d/.test(val))    score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const levels = [
+    { pct: '20%', color: '#ff4433', label: 'MUITO FRACA' },
+    { pct: '40%', color: '#ff8800', label: 'FRACA' },
+    { pct: '60%', color: '#e8d000', label: 'MÉDIA' },
+    { pct: '80%', color: '#90d030', label: 'BOA' },
+    { pct: '100%',color: '#2eff9a', label: 'FORTE' },
+  ];
+  const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+  bar.style.width = lvl.pct;
+  bar.style.background = lvl.color;
+  lbl.textContent = lvl.label;
+  lbl.style.color = lvl.color;
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────
+async function doLogin() {
+  hideBanner('login-banner');
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+
+  if (!email || !senha) {
+    showBanner('login-banner', 'Preencha todos os campos.'); return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showBanner('login-banner', 'Email inválido.'); return;
+  }
+
+  setLoading('btn-login', true);
+  try {
+    const data = await apiFetch(`${API_USERS}/login`, {
+      method: 'POST',
+      body: JSON.stringify({ email, senha }),
+    });
+
+    // Salva token no sessionStorage
+    if (data.token) {
+      sessionStorage.setItem('jwt_token', data.token);
+      sessionStorage.setItem('user', JSON.stringify(data.user));
+    }
+
+    showBanner('login-banner', `Bem-vindo, ${data.user?.nome || 'usuário'}!`, 'success');
+
+    // Exibe token
+    if (data.token) {
+      const box = document.getElementById('token-box');
+      document.getElementById('token-value').textContent = data.token;
+      document.getElementById('token-meta').innerHTML =
+        `Logado como <strong>${data.user?.nome}</strong> &nbsp;·&nbsp; <strong>${data.user?.email}</strong>`;
+      box.classList.add('show');
+    }
+
+    // Redireciona após 1.8s se existir dashboard.html
+    setTimeout(() => {
+      if (window._redirectOnLogin) window.location.href = window._redirectOnLogin;
+    }, 1800);
+
+  } catch (e) {
+    showBanner('login-banner', e.message || 'Credenciais inválidas.');
+  } finally {
+    setLoading('btn-login', false);
+  }
+}
+
+// ── REGISTRO ──────────────────────────────────────────────────
+async function doRegister() {
+  hideBanner('register-banner');
+  const nome   = document.getElementById('reg-nome').value.trim();
+  const email  = document.getElementById('reg-email').value.trim();
+  const senha  = document.getElementById('reg-senha').value;
+  const confirm = document.getElementById('reg-confirm').value;
+
+  if (!nome || !email || !senha || !confirm) {
+    showBanner('register-banner', 'Preencha todos os campos.'); return;
+  }
+  if (nome.length < 2) {
+    showBanner('register-banner', 'Nome muito curto.'); return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showBanner('register-banner', 'Email inválido.'); return;
+  }
+  if (senha.length < 6) {
+    showBanner('register-banner', 'A senha precisa ter pelo menos 6 caracteres.'); return;
+  }
+  if (senha !== confirm) {
+    showBanner('register-banner', 'As senhas não coincidem.'); return;
+  }
+
+  setLoading('btn-register', true);
+  try {
+    await apiFetch(API_USERS, {
+      method: 'POST',
+      body: JSON.stringify({ nome, email, senha }),
+    });
+
+    // Tenta logar automaticamente após registro e redirecionar ao dashboard
+    try {
+      const loginData = await apiFetch(`${API_USERS}/login`, {
+        method: 'POST',
+        body: JSON.stringify({ email, senha }),
+      });
+
+      if (loginData.token) {
+        sessionStorage.setItem('jwt_token', loginData.token);
+        sessionStorage.setItem('user', JSON.stringify(loginData.user));
+      }
+
+      showBanner('register-banner', 'Conta criada! Entrando e redirecionando...', 'success');
+
+      // Exibe token (opcional)
+      if (loginData.token) {
+        const box = document.getElementById('token-box');
+        document.getElementById('token-value').textContent = loginData.token;
+        document.getElementById('token-meta').innerHTML =
+          `Logado como <strong>${loginData.user?.nome}</strong> &nbsp;·&nbsp; <strong>${loginData.user?.email}</strong>`;
+        box.classList.add('show');
+      }
+
+      setTimeout(() => {
+        if (window._redirectOnLogin) window.location.href = window._redirectOnLogin;
+      }, 900);
+
+      return; // já redireciona, fim do fluxo register
+    } catch (e) {
+      // se login automático falhar, cai para o fluxo que mostra mensagem e troca para a aba de login
+      showBanner('register-banner', 'Conta criada! Faça login para continuar.', 'success');
+    }
+
+    // Limpa campos e volta à aba de login (fallback)
+    ['reg-nome','reg-email','reg-senha','reg-confirm'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('strength-bar-wrap').style.display = 'none';
+
+    setTimeout(() => switchTab('login'), 1200);
+
+  } catch (e) {
+    showBanner('register-banner', e.message || 'Erro ao criar conta.');
+  } finally {
+    setLoading('btn-register', false);
+  }
+}
+
+// ── COPY TOKEN ────────────────────────────────────────────────
+async function copyToken() {
+  const token = document.getElementById('token-value').textContent;
+  try {
+    await navigator.clipboard.writeText(token);
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => btn.textContent = 'Copiar token', 2000);
+  } catch { /* fallback silencioso */ }
+}
+
+// ── Opcional: definir redirecionamento após login ─────────────
+// window._redirectOnLogin = 'dashboard.html';
+
+// mostra aviso se veio do dashboard por sessão expirada
+(function checkExpiredParam() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('session') === 'expired') {
+      // assume que showBanner e login-banner existem
+      showBanner('login-banner', 'Sessão expirada. Faça login novamente.', 'error');
+      // limpa query para não repetir no reload
+      history.replaceState(null, '', window.location.pathname);
+    }
+  } catch (e) { /* silencioso */ }
+})();
+</script>
+</body>
+</html>
