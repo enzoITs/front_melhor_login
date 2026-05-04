@@ -1,0 +1,597 @@
+/* IMPORT FONT */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/* =========================
+   ROOT
+========================= */
+:root {
+    --black: #0e0e0e;
+    --gold: #d4af37;
+    --gold-dark: #b8962e;
+    --gold-glow: rgba(212, 175, 55, 0.18);
+    --blur: #d0c5afa6;
+    --font: 'Space Grotesk', sans-serif;
+}
+
+/* =========================
+   RESET
+========================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================
+   BODY / LAYOUT
+========================= */
+body {
+    display: flex;
+    min-height: 100vh;
+    background-image: linear-gradient(
+        135deg,
+        var(--black),
+        rgb(50, 50, 50),
+        rgb(100, 100, 100),
+        rgb(65, 65, 65)
+    );
+    font-family: var(--font);
+    overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.07) 2px,
+        rgba(0, 0, 0, 0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanMove 8s linear infinite;
+}
+
+@keyframes scanMove {
+    from { background-position: 0 0; }
+    to   { background-position: 0 100px; }
+}
+
+/* =========================
+   HEADER
+========================= */
+header {
+    display: flex;
+    min-height: 100vh;
+    width: 230px;
+    background-color: var(--black);
+    flex-wrap: wrap;
+    align-content: space-between;
+    justify-content: space-around;
+    border-right: 1px solid rgba(212, 175, 55, 0.1);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Linha dourada animada na borda */
+header::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 1px; height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    animation: lineGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes lineGlow {
+    from { opacity: 0.3; }
+    to   { opacity: 1; }
+}
+
+/* NAV */
+nav {
+    display: block;
+    width: 100%;
+    min-height: 350px;
+}
+
+/* =========================
+   TITLES
+========================= */
+h1 {
+    line-height: 28px;
+    text-align: center;
+}
+
+.septem {
+    display: block;
+    padding: 40px 0 40px 10px;
+    color: var(--gold);
+    font-size: 20px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px var(--gold-glow);
+    animation: titlePulse 4s ease-in-out infinite;
+    cursor: default;
+}
+
+@keyframes titlePulse {
+    0%, 100% { text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+    50%       { text-shadow: 0 0 30px rgba(212, 175, 55, 0.8), 0 0 60px rgba(212, 175, 55, 0.3); }
+}
+
+/* =========================
+   LINKS
+========================= */
+a {
+    position: relative;
+    text-decoration: none;
+    color: var(--blur);
+    transition: color 0.7s;
+    font-family: var(--font);
+}
+
+a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 0%;
+    height: 2px;
+    background-color: var(--gold);
+    transition: width 0.7s ease;
+    box-shadow: 0 0 8px var(--gold);
+}
+
+a:hover {
+    color: var(--gold);
+}
+
+a:hover::after {
+    width: 100%;
+}
+
+/* =========================
+   LISTAS
+========================= */
+ul {
+    font-family: var(--font);
+}
+
+/* HEADER LIST */
+.h-list li {
+    list-style: none;
+    padding: 5px 0 5px 35px;
+    transition: transform 0.3s ease;
+}
+
+.h-list li:hover {
+    transform: translateX(6px);
+}
+
+.h-list li span {
+    color: var(--gold);
+}
+
+/* =========================
+   HEADER FOOTER (ABOUT/LOGOUT)
+========================= */
+.f-list {
+    display: flex;
+    justify-content: space-between;
+}
+
+.f-list li {
+    list-style: none;
+    padding: 10px;
+}
+
+.f-list img {
+    width: 12px;
+    height: 12px;
+}
+
+/* =========================
+   TEXT DEFAULTS
+========================= */
+span {
+    color: var(--gold);
+}
+
+p {
+    color: var(--blur);
+}
+
+/* =========================
+   MAIN
+========================= */
+main {
+    flex: 1;
+    padding: 20px;
+    margin-left: 40px;
+    padding-bottom: 80px;
+    font-family: var(--font);
+    animation: fadeInMain 0.8s ease both;
+}
+
+@keyframes fadeInMain {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================
+   MAIN HEADER
+========================= */
+.m-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 75vw;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.m-header p,
+.m-header h1 {
+    color: white;
+}
+
+/* STATUS HEADER */
+.mh-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 32px;
+    margin-bottom: 60px;
+}
+
+.mh-status h1 {
+    font-size: 55px;
+    padding-bottom: 10px;
+    letter-spacing: 4px;
+    animation: slideInLeft 0.8s cubic-bezier(0.23, 1.01, 0.32, 1) both;
+}
+
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.p-mh p {
+    animation: fadeInUp 0.8s ease both;
+    animation-delay: 0.2s;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* STATUS INFO */
+.s-status {
+    display: flex;
+    height: 100px;
+    gap: 8px;
+    animation: fadeInRight 0.8s ease both;
+    animation-delay: 0.3s;
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.race,
+.gap {
+    padding: 25px;
+    height: auto;
+    min-height: 80px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    cursor: default;
+}
+
+.s-status h6 {
+    color: var(--blur);
+    padding: 0 0 8px 0;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
+
+.s-status p {
+    color: var(--blur);
+}
+
+.s-status .gap p {
+    font-size: 23px;
+}
+
+.s-status .race p {
+    font-size: 23px;
+}
+
+/* Status value em dourado */
+.r-status {
+    color: var(--gold);
+    font-size: 28px;
+    font-weight: 700;
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+    animation: counterPop 0.6s cubic-bezier(0.23, 1.01, 0.32, 1) both;
+    animation-delay: 0.5s;
+}
+
+@keyframes counterPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+}
+
+/* =========================
+   BOTTOM DATA — CARDS
+========================= */
+.bottom-data section {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.card {
+    flex: 1;
+    min-width: 140px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 10px;
+    padding: 20px 16px;
+    backdrop-filter: blur(12px);
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+    animation: cardReveal 0.6s ease both;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes cardReveal {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+
+
+.card h6 {
+    color: var(--blur);
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 22px;
+    font-weight: 600;
+    color: white;
+}
+
+.card p span {
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+}
+
+/* =========================
+   CIRCUIT MAP
+========================= */
+.m-main {
+    width: 75vw;
+}
+
+.m-main section {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    padding: 24px;
+    backdrop-filter: blur(12px);
+    width: 100%;
+    animation: cardReveal 0.6s ease 0.5s both;
+}
+
+.m-main h3 {
+    color: var(--gold);
+    letter-spacing: 2px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.map {
+    color: var(--gold) !important;
+    font-size: 14px !important;
+    letter-spacing: 2px;
+    margin: 12px 0 6px !important;
+}
+
+.h6 {
+    font-size: 11px !important;
+    letter-spacing: 1px;
+    color: var(--blur) !important;
+}
+
+/* SVG Circuit */
+.circuit-svg {
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Ponto pulsante do carro */
+.circuit-dot {
+    animation: dotPulse 1.5s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes dotPulse {
+    0%, 100% { r: 5; opacity: 1; }
+    50%       { r: 9; opacity: 0.6; }
+}
+
+/* Tracejado animado do circuito */
+.circuit-track {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawTrack 2.5s ease forwards;
+    animation-delay: 0.5s;
+}
+
+@keyframes drawTrack {
+    to { stroke-dashoffset: 0; }
+}
+
+/* =========================
+   FOOTER (FIXO E COMPACTO)
+========================= */
+footer {
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 0;
+    left: 230px;
+    width: calc(100% - 230px);
+    height: 60px;
+    background: var(--black);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 5px 20px;
+    z-index: 1000;
+    font-family: var(--font);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+
+footer nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: unset;
+    width: 100%;
+}
+
+footer h1 {
+    font-size: 14px;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+footer ul {
+    display: flex;
+    gap: 15px;
+    list-style: none;
+}
+
+footer li {
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--blur);
+    position: relative;
+    letter-spacing: 1px;
+}
+
+footer a {
+    font-size: 12px;
+    color: var(--blur);
+}
+
+/* CONFIG */
+.config {
+    width: 20px;
+    height: 20px;
+    background: #141414;
+    border-radius: 50%;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    cursor: pointer;
+}
+
+/* =========================
+   REGISTER PAGE
+========================= */
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.register-card {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 12px;
+    width: 350px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+.register-card h2 {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.register-card p {
+    margin-bottom: 20px;
+}
+
+/* INPUTS */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    color: var(--blur);
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.input-group input {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #1a1a1a;
+    color: white;
+    outline: none;
+    transition: 0.7s;
+}
+
+.input-group input:focus {
+    border: 1px solid var(--gold);
+}
+
+/* BUTTON */
+.register-card button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background: var(--gold);
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.7s;
+}
+
+.register-card button:hover {
+    background: #b8962e;
+}
+
+/* LINK */
+.login-link {
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+}
